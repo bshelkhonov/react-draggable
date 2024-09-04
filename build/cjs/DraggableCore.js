@@ -58,6 +58,7 @@ let dragEventFor = eventsFor.mouse;
   scrollValue: number,
   scrollThreshold: number,
   debounceScrollValue: number,
+  scrollElementRef?: ?React.ElementRef<any>,
 };*/
 /*:: export type DraggableCoreProps = {
   ...DraggableCoreDefaultProps,
@@ -89,6 +90,7 @@ class DraggableCore extends React.Component /*:: <DraggableCoreProps>*/{
     _defineProperty(this, "touchIdentifier", null);
     _defineProperty(this, "mounted", false);
     _defineProperty(this, "scrollIfNearBounds", void 0);
+    _defineProperty(this, "scrollElementRef", undefined);
     _defineProperty(this, "handleDragStart", e => {
       // Make it possible to attach event handlers on top of this one.
       this.props.onMouseDown(e);
@@ -285,16 +287,18 @@ class DraggableCore extends React.Component /*:: <DraggableCoreProps>*/{
       return this.handleDragStop(e);
     });
     this.scrollIfNearBounds = (0, _lodash.debounce)(() => {
+      if (!this.scrollElementRef?.current) return;
       const {
-        innerHeight: clientHeight
-      } = window;
-      if (clientHeight - this.lastCursorPosY <= this.props.scrollThreshold) {
+        top,
+        bottom
+      } = this.scrollElementRef.current.getBoundingClientRect();
+      if (bottom - this.lastCursorPosY <= this.props.scrollThreshold) {
         window.scrollBy({
           top: this.props.scrollValue,
           left: 0,
           behavior: 'instant'
         });
-      } else if (this.lastCursorPosY <= this.props.scrollThreshold) {
+      } else if (this.lastCursorPosY - top <= this.props.scrollThreshold) {
         window.scrollBy({
           top: -this.props.scrollValue,
           left: 0,
