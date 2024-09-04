@@ -74,8 +74,6 @@ class App extends React.Component {
     const dragHandlers = {onStart: this.onStart, onStop: this.onStop};
     const {deltaPosition, controlledPosition} = this.state;
 
-    const parentRef = React.createRef(document.documentElement);
-
     return (
       <div>
         <h1>React Draggable</h1>
@@ -86,7 +84,7 @@ class App extends React.Component {
         <Draggable {...dragHandlers}>
           <div className="box">I can be dragged anywhere</div>
         </Draggable>
-        <Draggable {...dragHandlers} scrollElementRef={parentRef}>
+        <Draggable {...dragHandlers} scrollValue={20} scrollDebounceValue={10} scrollBottomThreshold={window.innerHeight - 100} scrollTopThreshold={100}>
           <div className="box">I will scroll parent</div>
         </Draggable>
         <Draggable axis="x" {...dragHandlers}>
