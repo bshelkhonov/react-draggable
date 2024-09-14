@@ -18,8 +18,8 @@ function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; 
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
 function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
 function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-/*:: import type {EventHandler, MouseTouchEvent} from './utils/types';*/
-/*:: import type {Element as ReactElement} from 'react';*/
+/*:: import type { EventHandler, MouseTouchEvent } from './utils/types';*/
+/*:: import type { Element as ReactElement } from 'react';*/
 // Simple abstraction for dragging events names.
 const eventsFor = {
   touch: {
@@ -37,38 +37,48 @@ const eventsFor = {
 // Default to mouse events.
 let dragEventFor = eventsFor.mouse;
 /*:: export type DraggableData = {
-  node: HTMLElement,
-  x: number, y: number,
-  deltaX: number, deltaY: number,
-  lastX: number, lastY: number,
+    node: HTMLElement,
+    x: number,
+    y: number,
+    deltaX: number,
+    deltaY: number,
+    lastX: number,
+    lastY: number,
 };*/
-/*:: export type DraggableEventHandler = (e: MouseEvent, data: DraggableData) => void | false;*/
-/*:: export type ControlPosition = {x: number, y: number};*/
-/*:: export type PositionOffsetControlPosition = {x: number|string, y: number|string};*/
+/*:: export type DraggableEventHandler = (
+    e: MouseEvent,
+    data: DraggableData,
+) => void | false;*/
+/*:: export type ControlPosition = { x: number, y: number };*/
+/*:: export type PositionOffsetControlPosition = {
+    x: number | string,
+    y: number | string,
+};*/
 /*:: export type DraggableCoreDefaultProps = {
-  allowAnyClick: boolean,
-  allowMobileScroll: boolean,
-  disabled: boolean,
-  enableUserSelectHack: boolean,
-  onStart: DraggableEventHandler,
-  onDrag: DraggableEventHandler,
-  onStop: DraggableEventHandler,
-  onMouseDown: (e: MouseEvent) => void,
-  scale: number,
-  scrollValue: number,
-  scrollTopThreshold: number,
-  scrollBottomThreshold: number,
-  debounceScrollValue: number,
-  scrollElementRef?: ?React.ElementRef<any>,
+    allowAnyClick: boolean,
+    allowMobileScroll: boolean,
+    disabled: boolean,
+    enableUserSelectHack: boolean,
+    onStart: DraggableEventHandler,
+    onDrag: DraggableEventHandler,
+    onStop: DraggableEventHandler,
+    onMouseDown: (e: MouseEvent) => void,
+    scale: number,
+    scrollValue: number,
+    scrollTopThreshold: number,
+    scrollBottomThreshold: number,
+    debounceScrollValue: number,
+    scrollTimeoutValue: number,
+    scrollElementRef?: ?React.ElementRef<any>,
 };*/
 /*:: export type DraggableCoreProps = {
-  ...DraggableCoreDefaultProps,
-  cancel: string,
-  children: ReactElement<any>,
-  offsetParent: HTMLElement,
-  grid: [number, number],
-  handle: string,
-  nodeRef?: ?React.ElementRef<any>,
+    ...DraggableCoreDefaultProps,
+    cancel: string,
+    children: ReactElement<any>,
+    offsetParent: HTMLElement,
+    grid: [number, number],
+    handle: string,
+    nodeRef?: ?React.ElementRef<any>,
 };*/
 //
 // Define <DraggableCore>.
@@ -98,7 +108,9 @@ class DraggableCore extends React.Component /*:: <DraggableCoreProps>*/{
       this.props.onMouseDown(e);
 
       // Only accept left-clicks.
-      if (!this.props.allowAnyClick && typeof e.button === 'number' && e.button !== 0) return false;
+      if (!this.props.allowAnyClick && typeof e.button === 'number' && e.button !== 0) {
+        return false;
+      }
 
       // Get nodes. Be sure to grab relative document (could be iframed)
       const thisNode = this.findDOMNode();
@@ -116,7 +128,9 @@ class DraggableCore extends React.Component /*:: <DraggableCoreProps>*/{
 
       // Prevent scrolling on mobile devices, like ipad/iphone.
       // Important that this is after handle/cancel.
-      if (e.type === 'touchstart' && !this.props.allowMobileScroll) e.preventDefault();
+      if (e.type === 'touchstart' && !this.props.allowMobileScroll) {
+        e.preventDefault();
+      }
 
       // Set touch identifier in component state if this is a touch event. This allows us to
       // distinguish between individual touches on multitouch screens by identifying which
@@ -233,9 +247,8 @@ class DraggableCore extends React.Component /*:: <DraggableCoreProps>*/{
       this.props.onDrag(e, coreEvent);
       this.lastX = x;
       this.lastY = y;
-      this.lastScrollX = this.lastScrollX + deltaScrollX;
-      this.lastScrollY = this.lastScrollY + deltaScrollY;
-      this.scrollIfNearBounds();
+      this.lastScrollX += deltaScrollX;
+      this.lastScrollY += deltaScrollY;
     });
     _defineProperty(this, "handleDragStop", e => {
       if (!this.dragging) return;
@@ -261,7 +274,9 @@ class DraggableCore extends React.Component /*:: <DraggableCoreProps>*/{
       const thisNode = this.findDOMNode();
       if (thisNode) {
         // Remove user-select hack
-        if (this.props.enableUserSelectHack) (0, _domFns.removeUserSelectStyles)(thisNode.ownerDocument);
+        if (this.props.enableUserSelectHack) {
+          (0, _domFns.removeUserSelectStyles)(thisNode.ownerDocument);
+        }
       }
       (0, _log.default)('DraggableCore: handleDragStop: %j', coreEvent);
 
@@ -271,6 +286,8 @@ class DraggableCore extends React.Component /*:: <DraggableCoreProps>*/{
       this.lastY = NaN;
       this.lastScrollX = NaN;
       this.lastScrollY = NaN;
+      this.lastCursorPosX = NaN;
+      this.lastCursorPosY = NaN;
       if (thisNode) {
         // Remove event handlers
         (0, _log.default)('DraggableCore: Removing handlers');
@@ -305,10 +322,16 @@ class DraggableCore extends React.Component /*:: <DraggableCoreProps>*/{
     });
     this.scrollIfNearBounds = (0, _debounce.default)(() => {
       const element = this.props.scrollElementRef?.current || window;
+      let scrolled = false;
       if (this.lastCursorPosY >= this.props.scrollBottomThreshold) {
         element.scrollBy(0, this.props.scrollValue);
+        scrolled = true;
       } else if (this.lastCursorPosY <= this.props.scrollTopThreshold) {
         element.scrollBy(0, -this.props.scrollValue);
+        scrolled = true;
+      }
+      if (scrolled) {
+        setTimeout(this.scrollIfNearBounds, this.props.scrollTimeoutValue);
       }
     }, this.props.debounceScrollValue);
     this.onScrollDebounced = (0, _debounce.default)(this.onScroll, this.props.debounceScrollValue);
@@ -521,5 +544,6 @@ _defineProperty(DraggableCore, "defaultProps", {
   scrollValue: 4,
   scrollTopThreshold: 50,
   scrollBottomThreshold: 2000,
-  debounceScrollValue: 1
+  debounceScrollValue: 1,
+  scrollTimeoutValue: 0.05
 });
